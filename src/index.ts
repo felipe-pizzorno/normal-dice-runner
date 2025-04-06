@@ -1,100 +1,101 @@
-import { greet } from "./import"
 import * as THREE from "three";
-import { startCameraAndControls } from "./three/camera"
+import { startCameraAndControls } from "./three/camera";
+import * as CANNON from "cannon";
+import { MeshWithPhysics } from "./objects/types";
+import { createSphere } from "./objects/sphere";
+import { createPlane } from "./objects/plane";
+import { createCube } from "./objects/cube";
 
 const main = () => {
-
-
-  const scene = new THREE.Scene()
-  scene.background = new THREE.Color( 'black' )
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color("black");
 
   const renderer = new THREE.WebGLRenderer();
-  renderer.setSize( window.innerWidth, window.innerHeight );
-  document.body.appendChild( renderer.domElement );
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
 
-  const {camera, controls} = startCameraAndControls(renderer.domElement);
+  const { camera } = startCameraAndControls(renderer.domElement);
 
-{
+  const world = new CANNON.World();
+  world.gravity.set(0, -9.82, 0);
 
-		const planeSize = 40;
+  const plane = createPlane(world, scene);
+  const cube = createCube(world, scene);
+  const sphere = createSphere(world, scene);
+  const lights = createLights(world, scene);
+  const pyshicsElements: MeshWithPhysics[] = [sphere, cube]
 
-		const loader = new THREE.TextureLoader();
-		const texture = loader.load( 'https://threejs.org/manual/examples/resources/images/checker.png' );
-		texture.wrapS = THREE.RepeatWrapping;
-		texture.wrapT = THREE.RepeatWrapping;
-		texture.magFilter = THREE.NearestFilter;
-		texture.colorSpace = THREE.SRGBColorSpace;
-		const repeats = planeSize / 2;
-		texture.repeat.set( repeats, repeats );
+  const resizeRendererToDisplaySize = (renderer: THREE.WebGLRenderer) => {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
 
-		const planeGeo = new THREE.PlaneGeometry( planeSize, planeSize );
-		const planeMat = new THREE.MeshPhongMaterial( {
-			map: texture,
-			side: THREE.DoubleSide,
-		} );
-		const mesh = new THREE.Mesh( planeGeo, planeMat );
-		mesh.rotation.x = Math.PI * - .5;
-		scene.add( mesh );
+    return needResize;
+  };
 
-	}
+  const fixedTimeStep = 1.0 / 60.0; // seconds
+  const maxSubSteps = 3;
 
-	{
+  let lastTime: number;
+  const physicsSimulationLoop = (time: number) => {
+    requestAnimationFrame(physicsSimulationLoop);
+    if (lastTime !== undefined) {
+      var dt = (time - lastTime) / 1000;
+      world.step(fixedTimeStep, dt, maxSubSteps);
+    }
+    console.log("Sphere z position: " + sphere.body.position.z);
+    lastTime = time;
+    pyshicsElements.forEach(({ updateWithPhysics }) => updateWithPhysics());
+  };
 
-		const cubeSize = 4;
-		const cubeGeo = new THREE.BoxGeometry( cubeSize, cubeSize, cubeSize );
-		const cubeMat = new THREE.MeshPhongMaterial( { color: '#8AC' } );
-		const mesh = new THREE.Mesh( cubeGeo, cubeMat );
-		mesh.position.set( cubeSize + 1, cubeSize / 2, 0 );
-		scene.add( mesh );
+  const render = () => {
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
 
-	}
+    renderer.render(scene, camera);
+    requestAnimationFrame(render);
+  };
 
-	{
+  requestAnimationFrame(render);
+  requestAnimationFrame(physicsSimulationLoop);
+};
 
-		const sphereRadius = 3;
-		const sphereWidthDivisions = 32;
-		const sphereHeightDivisions = 16;
-		const sphereGeo = new THREE.SphereGeometry( sphereRadius, sphereWidthDivisions, sphereHeightDivisions );
-		const sphereMat = new THREE.MeshPhongMaterial( { color: '#CA8' } );
-		const mesh = new THREE.Mesh( sphereGeo, sphereMat );
-		mesh.position.set( - sphereRadius - 1, sphereRadius + 2, 0 );
-		scene.add( mesh );
+const createLights = (world: CANNON.World, scene: THREE.Scene) => {
+  const ambientColor = 0xffffff;
+  const ambientIntensity = 0.3;
+  const ambientLight = new THREE.AmbientLight(ambientColor, ambientIntensity);
+  scene.add(ambientLight);
 
-	}
+  const color = 0xffffff;
+  const intensity = 2;
+  const light = new THREE.DirectionalLight(color, intensity);
+  light.position.set(10, 20, 10);
+  light.target.position.set(0, 0, 0);
+  light.castShadow = true;
+  const lightSize = 50;
+  const maxTextureSize = 5000;
 
-	{
+  light.shadow.camera.left = -lightSize;
+  light.shadow.camera.right = lightSize;
+  light.shadow.camera.top = lightSize;
+  light.shadow.camera.bottom = -lightSize;
+  light.shadow.mapSize.width = maxTextureSize;
+  light.shadow.mapSize.height = maxTextureSize;
 
-		const color = 0xFFFFFF;
-		const intensity = 1;
-		const light = new THREE.AmbientLight( color, intensity );
-		scene.add( light );
+  scene.add(light);
+  scene.add(light.target);
 
-	}
+  // Gizmo for showing light
+  // const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
+  // scene.add(cameraHelper);
+};
 
-	const resizeRendererToDisplaySize = (renderer: THREE.WebGLRenderer) => {
-		const canvas = renderer.domElement;
-		const width = canvas.clientWidth;
-		const height = canvas.clientHeight;
-		const needResize = canvas.width !== width || canvas.height !== height;
-		if ( needResize ) {
-			renderer.setSize( width, height, false );
-		}
-
-		return needResize;
-	}
-
-	function render() {
-		if ( resizeRendererToDisplaySize( renderer ) ) {
-			const canvas = renderer.domElement;
-			camera.aspect = canvas.clientWidth / canvas.clientHeight;
-			camera.updateProjectionMatrix();
-		}
-
-		renderer.render( scene, camera );
-		requestAnimationFrame( render );
-	}
-
-	requestAnimationFrame(render);
-}
-
-main()
+main();

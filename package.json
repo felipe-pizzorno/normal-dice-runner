@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode production --config webpack.config.mjs",
     "deploy": "gh-pages -d dist",
-    "predeploy": "npm run build"
+    "predeploy": "npm run build",
+    "live": "live-server"
   },
   "keywords": [],
   "author": "",
@@ -16,11 +17,14 @@
   "type": "module",
   "homepage": "https://felipe-pizzorno.github.io/normal-dice-runner",
   "devDependencies": {
+    "@types/cannon": "^0.1.13",
     "@types/three": "^0.175.0",
+    "cannon": "^0.6.2",
     "copy-webpack-plugin": "^13.0.0",
     "favicons-webpack-plugin": "^6.0.1",
     "gh-pages": "^6.3.0",
     "html-webpack-plugin": "^5.6.3",
+    "live-server": "^1.2.2",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
     "webpack": "^5.98.0",
