@@ -1,12 +1,13 @@
 import * as THREE from "three";
 import * as CANNON from "cannon";
+import { MeshWithPhysics } from "./types";
 
 export const setUpdateWithPhysics = ({
   mesh,
   body,
 }: {
-  mesh: THREE.Mesh;
-  body: CANNON.Body;
+  mesh: MeshWithPhysics["mesh"];
+  body: MeshWithPhysics["body"];
 }) => ({
   mesh,
   body,

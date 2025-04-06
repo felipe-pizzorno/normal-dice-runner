@@ -2,23 +2,33 @@ import * as THREE from "three";
 import * as CANNON from "cannon";
 import { MeshWithPhysics } from "./types";
 import { setUpdateWithPhysics } from "./utils";
+import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
 
-export const createCube = (world: CANNON.World, scene: THREE.Scene): MeshWithPhysics => {
+export const createDice = async (
+  world: CANNON.World,
+  scene: THREE.Scene
+): Promise<MeshWithPhysics> => {
   const cubeSize = 4;
-  const pointPosition = cubeSize / 2;
-  const cubeGeo = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-  const cubeMat = new THREE.MeshPhongMaterial({ color: "#8AC" });
-  const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-  mesh.position.set(cubeSize + 1, cubeSize + 10, 0);
-  mesh.castShadow = true;
-  scene.add(mesh);
+  const loader = new OBJLoader();
+  const diceMat = new THREE.MeshPhongMaterial({ color: "#8AC" });
+  // load a resource
+  const model = await loader.loadAsync(
+    // resource URL
+    "dice.obj",
+    // called when resource is loaded
+    function (xhr) {
+      console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+    }
+  );
+
+  model.position.set(0, 20, 0);
 
   const body = new CANNON.Body({
     mass: 5,
     position: new CANNON.Vec3(
-      mesh.position.x,
-      mesh.position.y,
-      mesh.position.z
+      model.position.x,
+      model.position.y,
+      model.position.z
     ),
     // shape: new CANNON.ConvexPolyhedron(
     //   [
@@ -46,10 +56,12 @@ export const createCube = (world: CANNON.World, scene: THREE.Scene): MeshWithPhy
     //     [1, 7, 3],
     //   ]
     // ),
-    shape: new CANNON.Box(new CANNON.Vec3(cubeSize / 2, cubeSize / 2, cubeSize / 2)),
+    shape: new CANNON.Box(
+      new CANNON.Vec3(cubeSize / 2, cubeSize / 2, cubeSize / 2)
+    ),
   });
   world.addBody(body);
   body.force = new CANNON.Vec3(-2000, 0, 0);
 
-  return setUpdateWithPhysics({ mesh, body });
+  return setUpdateWithPhysics({ mesh: model, body });
 };

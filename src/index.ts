@@ -5,8 +5,9 @@ import { MeshWithPhysics } from "./objects/types";
 import { createSphere } from "./objects/sphere";
 import { createPlane } from "./objects/plane";
 import { createCube } from "./objects/cube";
+import { createDice } from "./objects/dice";
 
-const main = () => {
+const main = async () => {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("black");
 
@@ -20,11 +21,13 @@ const main = () => {
   const world = new CANNON.World();
   world.gravity.set(0, -9.82, 0);
 
+  const lights = createLights(world, scene);
+
   const plane = createPlane(world, scene);
   const cube = createCube(world, scene);
   const sphere = createSphere(world, scene);
-  const lights = createLights(world, scene);
-  const pyshicsElements: MeshWithPhysics[] = [sphere, cube]
+  const dice = await createDice(world, scene);
+  const pyshicsElements: MeshWithPhysics[] = [sphere, cube, dice]
 
   const resizeRendererToDisplaySize = (renderer: THREE.WebGLRenderer) => {
     const canvas = renderer.domElement;
@@ -48,7 +51,6 @@ const main = () => {
       var dt = (time - lastTime) / 1000;
       world.step(fixedTimeStep, dt, maxSubSteps);
     }
-    console.log("Sphere z position: " + sphere.body.position.z);
     lastTime = time;
     pyshicsElements.forEach(({ updateWithPhysics }) => updateWithPhysics());
   };
