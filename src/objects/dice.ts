@@ -48,7 +48,7 @@ export const createDice = async (
 
 
   const body = new CANNON.Body({
-    mass: 5,
+    mass: 20,
     position: new CANNON.Vec3(
       model.position.x,
       model.position.y,
@@ -64,8 +64,11 @@ export const createDice = async (
   });
   world.addBody(body);
   const x = Math.random() * 1000
-  const y = Math.random() * 1000
-  body.force = new CANNON.Vec3(-5500 + x, 0, -600 - y);
+  const y = Math.random() * 2000
+  body.force = new CANNON.Vec3(-5500 + x, -4000 + y, 600);
+
+  const rot = (Math.random() * 4) - 2
+  body.applyLocalForce(new CANNON.Vec3(-1750), new CANNON.Vec3(3, 3, rot))
 
   return setUpdateWithPhysics({ mesh: model, body });
 };
