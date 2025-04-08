@@ -18,7 +18,7 @@ export const createDice = async (
   loader.setDRACOLoader( dracoLoader );
 
   // load a resource
-  // const model = await loader.loadAsync(
+  // const { scene: model } = await loader.loadAsync(
   //   // resource URL
   //   "d202/scene.gltf",
   //   // called when resource is loaded
@@ -26,16 +26,17 @@ export const createDice = async (
   //     console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
   //   }
   // );
-  // model.scene.position.set(0, 0, 0)
-  // model.scene.scale.set(0.01, 0.01, 0.01);
-  // model.scene.position.set(0, 5, 5)
-  // model.scene.castShadow = true
-  // scene.add(model.scene)
+  // model.position.set(0, 0, 0)
+  // model.scale.set(0.01, 0.01, 0.01);
+  // model.position.set(0, 5, 5)
+  // model.castShadow = true
+  // model.traverse(child => child.castShadow = true)
+  // scene.add(model)
 
   const objLoader = new OBJLoader()
   const model = await objLoader.loadAsync(
     // resource URL
-    "dice.obj",
+    "./assets/dice.obj",
     // called when resource is loaded
     function (xhr) {
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
@@ -44,6 +45,7 @@ export const createDice = async (
   //model.scale.set(0.01, 0.01, 0.01);
   model.position.set(15, 5, -2)
   model.castShadow = true
+  model.traverse(child => child.castShadow = true)
   scene.add(model)
 
 
@@ -63,11 +65,9 @@ export const createDice = async (
     // ),
   });
   world.addBody(body);
-  const x = Math.random() * 1000
-  const y = Math.random() * 2000
-  body.force = new CANNON.Vec3(-5500 + x, -4000 + y, 600);
+  body.force = new CANNON.Vec3(-5500, -4000, 600);
 
-  const rot = (Math.random() * 4) - 2
+  const rot = (Math.random() * 2) - 1
   body.applyLocalForce(new CANNON.Vec3(-1750), new CANNON.Vec3(3, 3, rot))
 
   return setUpdateWithPhysics({ mesh: model, body });

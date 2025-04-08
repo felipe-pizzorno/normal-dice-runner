@@ -8,7 +8,7 @@ export const createPlane = (world: CANNON.World, scene: THREE.Scene): MeshWithPh
 
   const loader = new THREE.TextureLoader();
   const texture = loader.load(
-    "https://threejs.org/manual/examples/resources/images/checker.png"
+    "./assets/floor-texture.png"
   );
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;

@@ -9,7 +9,7 @@ import { createDice } from "./objects/dice";
 
 const main = async () => {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("black");
+  scene.background = new THREE.Color("rgb(109,221,239)");
 
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize(window.innerWidth, window.innerHeight);
