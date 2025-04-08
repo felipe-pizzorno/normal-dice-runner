@@ -2,17 +2,38 @@ import * as THREE from "three";
 import * as CANNON from "cannon";
 import { MeshWithPhysics } from "./types";
 import { setUpdateWithPhysics } from "./utils";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import {OBJLoader} from 'three/examples/jsm/loaders/OBJLoader'
-
 export const createDice = async (
   world: CANNON.World,
   scene: THREE.Scene
-): Promise<MeshWithPhysics> => {
+): Promise<any> => {
   const cubeSize = 4;
-  const loader = new OBJLoader();
-  const diceMat = new THREE.MeshPhongMaterial({ color: "#8AC" });
+  const loader = new GLTFLoader();
+
+  // Optional: Provide a DRACOLoader instance to decode compressed mesh data
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath( '/examples/jsm/libs/draco/' );
+  loader.setDRACOLoader( dracoLoader );
+
   // load a resource
-  const model = await loader.loadAsync(
+  // const model = await loader.loadAsync(
+  //   // resource URL
+  //   "d202/scene.gltf",
+  //   // called when resource is loaded
+  //   function (xhr) {
+  //     console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  //   }
+  // );
+  // model.scene.position.set(0, 0, 0)
+  // model.scene.scale.set(0.01, 0.01, 0.01);
+  // model.scene.position.set(0, 5, 5)
+  // model.scene.castShadow = true
+  // scene.add(model.scene)
+
+  const objLoader = new OBJLoader()
+  const model = await objLoader.loadAsync(
     // resource URL
     "dice.obj",
     // called when resource is loaded
@@ -20,8 +41,11 @@ export const createDice = async (
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
   );
+  //model.scale.set(0.01, 0.01, 0.01);
+  model.position.set(15, 5, -2)
+  model.castShadow = true
+  scene.add(model)
 
-  model.position.set(0, 20, 0);
 
   const body = new CANNON.Body({
     mass: 5,
@@ -30,38 +54,56 @@ export const createDice = async (
       model.position.y,
       model.position.z
     ),
-    // shape: new CANNON.ConvexPolyhedron(
-    //   [
-    //     new CANNON.Vec3(-pointPosition, -pointPosition, -pointPosition),
-    //     new CANNON.Vec3(-pointPosition, -pointPosition, pointPosition),
-    //     new CANNON.Vec3(-pointPosition, pointPosition, -pointPosition),
-    //     new CANNON.Vec3(-pointPosition, pointPosition, pointPosition),
-    //     new CANNON.Vec3(pointPosition, -pointPosition, -pointPosition),
-    //     new CANNON.Vec3(pointPosition, -pointPosition, pointPosition),
-    //     new CANNON.Vec3(pointPosition, pointPosition, -pointPosition),
-    //     new CANNON.Vec3(pointPosition, pointPosition, pointPosition),
-    //   ],
-    //   [
-    //     [0, 6, 4],
-    //     [0, 2, 6],
-    //     [0, 3, 2],
-    //     [0, 1, 3],
-    //     [2, 7, 6],
-    //     [2, 3, 7],
-    //     [4, 6, 7],
-    //     [4, 7, 5],
-    //     [0, 4, 5],
-    //     [0, 5, 1],
-    //     [1, 5, 7],
-    //     [1, 7, 3],
-    //   ]
-    // ),
-    shape: new CANNON.Box(
-      new CANNON.Vec3(cubeSize / 2, cubeSize / 2, cubeSize / 2)
+    shape: new CANNON.ConvexPolyhedron(
+      vertices.map(([x, y, z]) => new CANNON.Vec3(x, y, z)),
+      faces
     ),
+    // shape: new CANNON.Box(
+    //   new CANNON.Vec3(cubeSize / 2, cubeSize / 2, cubeSize / 2)
+    // ),
   });
   world.addBody(body);
-  body.force = new CANNON.Vec3(-2000, 0, 0);
+  const x = Math.random() * 1000
+  const y = Math.random() * 1000
+  body.force = new CANNON.Vec3(-5500 + x, 0, -600 - y);
 
   return setUpdateWithPhysics({ mesh: model, body });
 };
+
+const vertices = [
+  [0.000000, -0.525731, 0.850651],
+  [0.850651, 0.000000, 0.525731],
+  [0.850651, 0.000000, -0.525731],
+  [-0.850651, 0.000000, -0.525731],
+  [-0.850651, 0.000000, 0.525731],
+  [-0.525731, 0.850651, 0.000000],
+  [0.525731, 0.850651, 0.000000],
+  [0.525731, -0.850651, 0.000000],
+  [-0.525731, -0.850651, 0.000000],
+  [0.000000, -0.525731, -0.850651],
+  [0.000000, 0.525731, -0.850651],
+  [0.000000, 0.525731, 0.850651]
+];
+
+const faces = [
+  [1, 2, 6],
+  [1, 7, 2],
+  [3, 4, 5],
+  [4, 3, 8],
+  [6, 5, 11],
+  [5, 6, 10],
+  [9, 10, 2],
+  [10, 9, 3],
+  [7, 8, 9],
+  [8, 7, 0],
+  [11, 0, 1],
+  [0, 11, 4],
+  [6, 2, 10],
+  [1, 6, 11],
+  [3, 5, 10],
+  [5, 4, 11],
+  [2, 7, 9],
+  [7, 1, 0],
+  [3, 9, 8],
+  [4, 8, 0],
+];

@@ -24,10 +24,10 @@ const main = async () => {
   const lights = createLights(world, scene);
 
   const plane = createPlane(world, scene);
-  const cube = createCube(world, scene);
-  const sphere = createSphere(world, scene);
+  //const cube = createCube(world, scene);
+  //const sphere = createSphere(world, scene);
   const dice = await createDice(world, scene);
-  const pyshicsElements: MeshWithPhysics[] = [sphere, cube, dice]
+  const pyshicsElements: MeshWithPhysics[] = [dice]
 
   const resizeRendererToDisplaySize = (renderer: THREE.WebGLRenderer) => {
     const canvas = renderer.domElement;

@@ -6,7 +6,12 @@ export const startCameraAndControls = (canvas: HTMLCanvasElement) => {
   const aspect = 2; // the canvas default
   const near = 0.1;
   const far = 100;
-  const camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
+  const camera = new THREE.PerspectiveCamera(
+    fov,
+    window.innerWidth / window.innerHeight,
+    near,
+    far
+  );
   camera.position.set( 0, 10, 20 );
 
   const controls = new OrbitControls( camera, canvas );

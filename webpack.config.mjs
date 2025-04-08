@@ -39,6 +39,14 @@ export default {
           to: 'favicon.ico', // Destination in dist folder
         },
       ]
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: './dice.obj', // Path to your favicon.ico
+          to: 'dice.obj', // Destination in dist folder
+        },
+      ]
     })
   ]
 };
