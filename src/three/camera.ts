@@ -12,10 +12,14 @@ export const startCameraAndControls = (canvas: HTMLCanvasElement) => {
     near,
     far
   );
-  camera.position.set( 0, 10, 20 );
+  camera.position.set( -2, 17, 12 );
 
   const controls = new OrbitControls( camera, canvas );
-  controls.target.set( 0, 5, 0 );
   controls.update();
-  return {camera, controls}
+
+  const setTarget = (obj: THREE.Object3D) => {
+    controls.target.copy(obj.position);
+    controls.update();
+  }
+  return { camera, controls, setTarget };
 }

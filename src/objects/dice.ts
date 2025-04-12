@@ -18,43 +18,57 @@ export const createDice = async (
   loader.setDRACOLoader( dracoLoader );
 
   // load a resource
-  // const { scene: model } = await loader.loadAsync(
-  //   // resource URL
-  //   "d202/scene.gltf",
-  //   // called when resource is loaded
-  //   function (xhr) {
-  //     console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-  //   }
-  // );
-  // model.position.set(0, 0, 0)
-  // model.scale.set(0.01, 0.01, 0.01);
-  // model.position.set(0, 5, 5)
-  // model.castShadow = true
-  // model.traverse(child => child.castShadow = true)
-  // scene.add(model)
-
-  const objLoader = new OBJLoader()
-  const model = await objLoader.loadAsync(
+  const { scene: model } = await loader.loadAsync(
     // resource URL
-    "./assets/dice.obj",
+    "./assets/d202/scene.gltf",
     // called when resource is loaded
     function (xhr) {
       console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     }
   );
-  //model.scale.set(0.01, 0.01, 0.01);
-  model.position.set(15, 5, -2)
+  model.updateMatrix();
+
+  //model.geometry.applyMatrix4(object.matrix);
+
+  model.position.set(0, 0, 0)
+  model.scale.set(0.01, 0.01, 0.01);
+  model.rotation.set(-0.57, 0, 0);
+  model.position.set(0, 0, 0)
   model.castShadow = true
   model.traverse(child => child.castShadow = true)
-  scene.add(model)
+
+  const MainObject = new THREE.Object3D();
+  MainObject.add(model);
+  MainObject.position.set(10, 5, 0);
+  MainObject.rotation.set(
+    Math.random() * 2 * Math.PI,
+    Math.random() * 2 * Math.PI,
+    Math.random() * 2 * Math.PI
+  );
+  scene.add(MainObject)
+
+  // const objLoader = new OBJLoader()
+  // const model2 = await objLoader.loadAsync(
+  //   // resource URL
+  //   "./assets/dice.obj",
+  //   // called when resource is loaded
+  //   function (xhr) {
+  //     console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+  //   }
+  // );
+  // model.scale.set(0.01, 0.01, 0.01);
+  // model2.position.set(0, 5, 0)
+  // model2.castShadow = true
+  // model2.traverse(child => child.castShadow = true)
+  // scene.add(model2)
 
 
   const body = new CANNON.Body({
     mass: 20,
     position: new CANNON.Vec3(
-      model.position.x,
-      model.position.y,
-      model.position.z
+      MainObject.position.x,
+      MainObject.position.y,
+      MainObject.position.z
     ),
     shape: new CANNON.ConvexPolyhedron(
       vertices.map(([x, y, z]) => new CANNON.Vec3(x, y, z)),
@@ -70,7 +84,7 @@ export const createDice = async (
   const rot = (Math.random() * 2) - 1
   body.applyLocalForce(new CANNON.Vec3(-1750), new CANNON.Vec3(3, 3, rot))
 
-  return setUpdateWithPhysics({ mesh: model, body });
+  return setUpdateWithPhysics({ mesh: MainObject, body });
 };
 
 const vertices = [

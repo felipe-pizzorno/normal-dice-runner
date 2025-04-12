@@ -17,7 +17,7 @@ const main = async () => {
   renderer.shadowMap.enabled = true;
   document.body.appendChild(renderer.domElement);
 
-  const { camera } = startCameraAndControls(renderer.domElement);
+  const { camera, setTarget: cameraSetTarget } = startCameraAndControls(renderer.domElement);
 
   const world = new CANNON.World();
   world.gravity.set(0, -9.82, 0);
@@ -25,7 +25,7 @@ const main = async () => {
   const lights = createLights(world, scene);
 
   const plane = createPlane(world, scene);
-  //const cube = createCube(world, scene);
+  //const cube = createCube(world, );
   //const sphere = createSphere(world, scene);
   const dice = await createDice(world, scene);
   const pyshicsElements: MeshWithPhysics[] = [dice]
@@ -57,6 +57,7 @@ const main = async () => {
   };
 
   const render = () => {
+    cameraSetTarget(dice.mesh)
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -73,12 +74,12 @@ const main = async () => {
 
 const createLights = (world: CANNON.World, scene: THREE.Scene) => {
   const ambientColor = 0xffffff;
-  const ambientIntensity = 0.3;
+  const ambientIntensity = 2;
   const ambientLight = new THREE.AmbientLight(ambientColor, ambientIntensity);
   scene.add(ambientLight);
 
   const color = 0xffffff;
-  const intensity = 2;
+  const intensity = 3;
   const light = new THREE.DirectionalLight(color, intensity);
   light.position.set(10, 20, 10);
   light.target.position.set(0, 0, 0);
